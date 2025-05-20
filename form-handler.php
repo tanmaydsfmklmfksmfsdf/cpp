@@ -2,19 +2,17 @@
 $name=$_POST['name'];
 $visitor_email=$_POST['email'];
 $subject=$_POST['subject'];
-$message=$_POST['message'];
-$email_form="info@yourwebsite.com";
-$email_subject="New Form Submission";
-$email_body= "User Name: $name.\n".
-                "User Email: $visitor_email.\n".
-                    "Subject: $subject.\n".
-                    "User Message: $message.\n";
+$message=$_POST['Message'];
 
-$to="tanmayirakshetti@gmail.com";
-$headers="from: $email_form \r\n";
-
-$headers.="Reply-To: $visitor_email \r\n";
-
-mail($to,$email_subject,$email_body,$headers);
-header("Location: contact.html");
+$conn = new mysqli('localhot','root','','contact us');
+if($conn->connect_error){
+  die('Connection Failed : '.$conn->connect_error);
+}else{
+  $stmt = $conn->prepare("insert into message_form(name,visitor_email,subject,message)
+  values(?,?,?,?)");
+  $stmt->($name,$visitor_email,$subject,$message);
+  $stmt->execute();
+  echo "Message Successfully Submited...";
+  $stmt->close();
+  $conn->close();
 ?>
