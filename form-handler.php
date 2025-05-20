@@ -1,18 +1,15 @@
 <?php
-$name=$_POST['name'];
-$visitor_email=$_POST['email'];
-$subject=$_POST['subject'];
-$message=$_POST['Message'];
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $name = $_POST["name"];
+    $email = $_POST["email"];
+    $subject = $_POST["subject"];
+    $message = $_POST["message"];
 
-$conn = new mysqli('localhot','root','','contact us');
-if($conn->connect_error){
-  die('Connection Failed : '.$conn->connect_error);
-}else{
-  $stmt = $conn->prepare("insert into message_form(name,visitor_email,subject,message)
-  values(?,?,?,?)");
-  $stmt->($name,$visitor_email,$subject,$message);
-  $stmt->execute();
-  echo "Message Successfully Submited...";
-  $stmt->close();
-  $conn->close();
+    // Do something (like save to DB, send mail, etc.)
+    echo "Message received successfully!";
+} else {
+    // Block other request methods
+    http_response_code(405);
+    echo "405 Method Not Allowed";
+}
 ?>
