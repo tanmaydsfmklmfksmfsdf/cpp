@@ -63,16 +63,18 @@
             </div>
         </div>
         <div class="contact-col">
-<form action="form-handler.php" method="post">
-    <input type="text" name="name" placeholder="Enter Your Name" required>
-    <input type="email" name="email" placeholder=" Enter Email Address" required>
-    <input type="text" name="subject" placeholder=" Enter Your subject" required>
-    <textarea rows="8"  name="message"      placeholder="Message" required></textarea>
-    <button type="submit" class="hero-btn red-btn">Send Message</button>
-</form>
-
-
-
+<div class="form-container">
+    <h2>Taxi Booking Form</h2>
+    <form id="bookingForm" action="sendMail.php" method="POST" onsubmit="return validateForm()">
+      <input type="text" name="name" placeholder="Your Name" required>
+      <input type="email" name="email" id="email" placeholder="Your Email" required>
+      <input type="text" name="pickup" placeholder="Pickup Location" required>
+      <input type="text" name="drop" placeholder="Drop Location" required>
+      <input type="datetime-local" name="dateTime" required>
+      <button type="submit">Book Now</button>
+    </form>
+  </div>
+  <script src="script.js"></script>
 
 
 
