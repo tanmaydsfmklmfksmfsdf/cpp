@@ -1,35 +1,81 @@
 <?php
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Get form data
-    $name     = htmlspecialchars($_POST['name']);
-    $email    = htmlspecialchars($_POST['email']);
-    $pickup   = htmlspecialchars($_POST['pickup']);
-    $drop     = htmlspecialchars($_POST['drop']);
-    $dateTime = htmlspecialchars($_POST['dateTime']);
-    $message  = htmlspecialchars($_POST['message']);
+// Load PHPMailer classes
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
-    // Email subject and content
-    $subject = "Cab Booking Confirmation - Dream-Drive";
-    $body = "Hello $name,\n\nThank you for booking a cab with Dream-Drive!\n\n".
-            "Your booking details are as follows:\n".
-            "Pickup Location: $pickup\n".
-            "Drop Location: $drop\n".
-            "Date & Time: $dateTime\n\n".
-            "Additional Message: $message\n\n".
-            "We will contact you shortly with further updates.\n\n".
-            "Regards,\nDream-Drive Team";
+// Load Composer or manual PHPMailer
+require 'PHPMailer/src/Exception.php';
+require 'PHPMailer/src/PHPMailer.php';
+require 'PHPMailer/src/SMTP.php';
 
-    $headers = "From: no-reply@dreamdrive.com\r\n" .
-               "Reply-To: support@dreamdrive.com\r\n" .
-               "X-Mailer: PHP/" . phpversion();
+// Database connection
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "contact us";
 
-    // Send email
-    if (mail($email, $subject, $body, $headers)) {
-        echo "<script>alert('Booking successful! A confirmation email has been sent.'); window.location.href='contact.html';</script>";
-    } else {
-        echo "<script>alert('Booking failed. Please try again later.'); window.location.href='contact.html';</script>";
-    }
-} else {
-    echo "Invalid request.";
+$conn = new mysqli($servername, $username, $password, $dbname);
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
+
+// Collect form data
+$name = $conn->real_escape_string($_POST['name']);
+$email = $conn->real_escape_string($_POST['email']);
+$pickup = $conn->real_escape_string($_POST['pickup']);
+$drop = $conn->real_escape_string($_POST['drop']);
+$dateTime = $conn->real_escape_string($_POST['dateTime']);
+$message = $conn->real_escape_string($_POST['message']);
+
+// Insert into database
+$sql = "INSERT INTO `contact-form` (`name`, `email`, `pickup`, `drop`, `dateTime`, `message`)
+        VALUES ('$name', '$email', '$pickup', '$drop', '$dateTime', '$message')";
+
+if ($conn->query($sql) === TRUE) {
+    // Email sending logic
+    $mail = new PHPMailer(true);
+
+    try {
+        // Server settings
+        $mail->isSMTP();
+        $mail->Host       = 'smtp.gmail.com';
+        $mail->SMTPAuth   = true;
+        $mail->Username   = 'n2pgaming321@gmail.com';        // ⬅️ Your Gmail
+        $mail->Password   = 'bqry krzu ubto pzdi';     // ⬅️ App password from Gmail
+        $mail->SMTPSecure = 'tls';
+        $mail->Port       = 587;
+       $mail->SMTPOptions = [
+    'ssl' => [
+        'verify_peer' => false,
+        'verify_peer_name' => false,
+        'allow_self_signed' => true,
+    ],
+];
+        // Recipients
+        $mail->setFrom('yourgmail@gmail.com', 'Dream Drive');
+        $mail->addAddress($email, $name);
+
+        // Email content
+        $mail->isHTML(true);
+        $mail->Subject = 'Booking Confirmation - Dream Drive';
+        $mail->Body    = "
+            <h3>Hello $name,</h3>
+            <p>Your booking was successful!</p>
+            <p><strong>Pickup:</strong> $pickup<br>
+            <strong>Drop:</strong> $drop<br>
+            <strong>Date & Time:</strong> $dateTime</p>
+            <p>Thank you for choosing Dream Drive.</p>
+        ";
+
+        $mail->send();
+        echo "Booking successful! A confirmation email has been sent to $email.";
+    } catch (Exception $e) {
+        echo "Booking successful, but email could not be sent. Error: {$mail->ErrorInfo}";
+    }
+
+} else {
+    echo "Error: " . $conn->error;
+}
+
+$conn->close();
 ?>
